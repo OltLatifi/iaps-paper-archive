@@ -73,13 +73,16 @@ class Command(BaseCommand):
             paper = Paper(id=original_id, title=title, abstract=abstract, publication_date=publication_date)
             paper.save()
 
-            for author in authors:
-                paper.authors.add(author)
-            for category in categories:
-                paper.categories.add(category)
+            paper.authors.add(*authors)
+            paper.categories.add(*categories)
+
+    def add_arguments(self, parser):
+        parser.add_argument("--full")
 
     def handle(self, *args, **options):
         try:
+            if options["full"]:
+                self.filename = "arxiv-metadata.json"
             with open(self.filename, "r") as file:
                 for line in file:
                     data = json.loads(line)
@@ -100,7 +103,7 @@ class Command(BaseCommand):
                         line_categories.append(self.insert_category(category))
                     
                     self.insert_paper(data, line_authors, line_categories)
-                    print("Json Line finieshed")
+                    print("Json Line finished")
 
         except FileNotFoundError:
             print("The file could not be found.")
