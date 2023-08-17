@@ -55,3 +55,18 @@ def search_category(search: str):
     )
 
     return categories
+
+def parse_asc_desc(qp: str) -> str:
+    """
+    Returns a string to concatinate order_by
+    By default orders by descending
+    """
+    if not qp:
+        return "-"
+    
+    if qp == "asc":
+        return ""
+    elif qp == "desc":
+        return "-"
+    else:
+        return "-"

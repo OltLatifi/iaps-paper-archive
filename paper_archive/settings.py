@@ -26,11 +26,12 @@ SECRET_KEY = "django-insecure-tfq&_j@79zt31@eje!mree2#4pv3$06y5_ady0_47)y3o=0gh%
 DEBUG = True
 
 ALLOWED_HOSTS = []
-
+USE_SESSION_AUTH = False
 
 # Application definition
 
 INSTALLED_APPS = [
+    "drf_yasg",
     "archive",
     "rest_framework",
     "django.contrib.admin",

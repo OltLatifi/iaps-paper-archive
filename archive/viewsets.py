@@ -1,53 +1,33 @@
 from rest_framework import viewsets
+from .models import Paper, Author, Category
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
 from .serializers import paper_serializer, author_serializer, category_serializer
-from .models import Paper, Author, Category
-from rest_framework.pagination import PageNumberPagination
-from .helpers import pagination_metadata, search_paper, search_author, search_category
-
-paginator = PageNumberPagination()
+from .views_utils import list_objects
+from .helpers import (
+    search_paper,
+    search_category,
+    search_author
+)
 
 class paper_viewset(viewsets.ViewSet):
+    model = Paper
     serializer = paper_serializer
 
     def list(self, request):
-        search = request.GET.get("search")
-
-        if search:
-            queryset = search_paper(search)
-        else:
-            queryset = Paper.objects.all()
-
-        result_page = paginator.paginate_queryset(queryset, request)
-
-        serializer = self.serializer(result_page, many=True)
-        result = pagination_metadata(paginator, serializer.data)
-        
-        return Response(result)
+        return list_objects(request, self.model, self.serializer, search_paper)
 
     def retrieve(self, request, pk=None):
-        queryset = get_object_or_404(Paper, id=pk)
+        queryset = get_object_or_404(self.model, id=pk)
         serializer = self.serializer(queryset)
         return Response(serializer.data)
 
 class author_viewset(viewsets.ViewSet):
+    model = Author
     serializer = author_serializer
     
     def list(self, request):
-        search = request.GET.get("search")
-
-        if search:
-            queryset = search_author(search)
-        else:
-            queryset = Author.objects.all()
-            
-        result_page = paginator.paginate_queryset(queryset, request)
-
-        serializer = self.serializer(result_page, many=True)
-        result = pagination_metadata(paginator, serializer.data)
-        
-        return Response(result)
+        return list_objects(request, self.model, self.serializer, search_author)
 
     def retrieve(self, request, pk=None):
         author = get_object_or_404(Author, pk=pk)
@@ -60,21 +40,11 @@ class author_viewset(viewsets.ViewSet):
         return Response(response_data)
 
 class category_viewset(viewsets.ViewSet):
+    model = Category
     serializer = category_serializer
 
     def list(self, request):
-        search = request.GET.get("search")
-
-        if search:
-            queryset = search_author(search)
-        else:
-            queryset = Category.objects.all()
-
-        result_page = paginator.paginate_queryset(queryset, request)
-        serializer = self.serializer(result_page, many=True)
-        result = pagination_metadata(paginator, serializer.data)
-        
-        return Response(result)
+        return list_objects(request, self.model, self.serializer, search_category)
 
     def retrieve(self, request, pk=None):
         category = get_object_or_404(Category, pk=pk)
