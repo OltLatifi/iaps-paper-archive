@@ -1,10 +1,21 @@
 from django.core.management.base import BaseCommand
 from archive.models import Paper, Author, Category
+from datetime import datetime
+import pytz
 import json
 
 class Command(BaseCommand):
     filename = "sample-data.json"
     help = "This command loads data from json to the database"
+
+    def handle_date(self, date_time: str) -> datetime:
+        """
+        Turns a string into a datetime (GMT)
+        """
+        format_ = '%a, %d %b %Y %H:%M:%S %Z'
+        parsed_datetime = datetime.strptime(date_time, format_)
+        parsed_datetime = parsed_datetime.replace(tzinfo=pytz.timezone('GMT'))
+        return parsed_datetime
 
     def generate_flat_author_list(self, author_list: list) -> list:
         """ 
@@ -45,7 +56,7 @@ class Command(BaseCommand):
         """
         Returns the first publication date of the paper
         """
-        return versions[0].get("created")
+        return self.handle_date(versions[0].get("created"))
     
     def insert_paper(self, data: dict, authors: list[Author], categories: list[Category]) -> Paper:
         """
@@ -89,6 +100,7 @@ class Command(BaseCommand):
                         line_categories.append(self.insert_category(category))
                     
                     self.insert_paper(data, line_authors, line_categories)
+                    print("Json Line finieshed")
 
         except FileNotFoundError:
             print("The file could not be found.")
