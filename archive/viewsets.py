@@ -4,7 +4,7 @@ from django.shortcuts import get_object_or_404
 from .serializers import paper_serializer, author_serializer, category_serializer
 from .models import Paper, Author, Category
 from rest_framework.pagination import PageNumberPagination
-from .helpers import pagination_metadata
+from .helpers import pagination_metadata, search_paper, search_author, search_category
 
 paginator = PageNumberPagination()
 
@@ -12,7 +12,13 @@ class paper_viewset(viewsets.ViewSet):
     serializer = paper_serializer
 
     def list(self, request):
-        queryset = Paper.objects.all()
+        search = request.GET.get("search")
+
+        if search:
+            queryset = search_paper(search)
+        else:
+            queryset = Paper.objects.all()
+
         result_page = paginator.paginate_queryset(queryset, request)
 
         serializer = self.serializer(result_page, many=True)
@@ -26,10 +32,16 @@ class paper_viewset(viewsets.ViewSet):
         return Response(serializer.data)
 
 class author_viewset(viewsets.ViewSet):
-    serializer = paper_serializer
+    serializer = author_serializer
     
     def list(self, request):
-        queryset = Author.objects.all()
+        search = request.GET.get("search")
+
+        if search:
+            queryset = search_author(search)
+        else:
+            queryset = Author.objects.all()
+            
         result_page = paginator.paginate_queryset(queryset, request)
 
         serializer = self.serializer(result_page, many=True)
@@ -48,8 +60,16 @@ class author_viewset(viewsets.ViewSet):
         return Response(response_data)
 
 class category_viewset(viewsets.ViewSet):
+    serializer = category_serializer
+
     def list(self, request):
-        queryset = Category.objects.all()
+        search = request.GET.get("search")
+
+        if search:
+            queryset = search_author(search)
+        else:
+            queryset = Category.objects.all()
+
         result_page = paginator.paginate_queryset(queryset, request)
         serializer = self.serializer(result_page, many=True)
         result = pagination_metadata(paginator, serializer.data)
