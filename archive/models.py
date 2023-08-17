@@ -12,4 +12,4 @@ class Paper(models.Model):
     abstract = models.TextField()
     authors = models.ManyToManyField(Author)
     categories = models.ManyToManyField(Category)
-    publication_date = models.CharField(max_length=511)
+    publication_date = models.DateTimeField()

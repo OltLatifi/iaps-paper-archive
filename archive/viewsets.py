@@ -3,23 +3,39 @@ from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
 from .serializers import paper_serializer, author_serializer, category_serializer
 from .models import Paper, Author, Category
+from rest_framework.pagination import PageNumberPagination
+from .helpers import pagination_metadata
+
+paginator = PageNumberPagination()
 
 class paper_viewset(viewsets.ViewSet):
+    serializer = paper_serializer
+
     def list(self, request):
         queryset = Paper.objects.all()
-        serializer = paper_serializer(queryset, many=True)
-        return Response(serializer.data)
+        result_page = paginator.paginate_queryset(queryset, request)
+
+        serializer = self.serializer(result_page, many=True)
+        result = pagination_metadata(paginator, serializer.data)
+        
+        return Response(result)
 
     def retrieve(self, request, pk=None):
         queryset = get_object_or_404(Paper, id=pk)
-        serializer = paper_serializer(queryset)
+        serializer = self.serializer(queryset)
         return Response(serializer.data)
 
 class author_viewset(viewsets.ViewSet):
+    serializer = paper_serializer
+    
     def list(self, request):
         queryset = Author.objects.all()
-        serializer = author_serializer(queryset, many=True)
-        return Response(serializer.data)
+        result_page = paginator.paginate_queryset(queryset, request)
+
+        serializer = self.serializer(result_page, many=True)
+        result = pagination_metadata(paginator, serializer.data)
+        
+        return Response(result)
 
     def retrieve(self, request, pk=None):
         author = get_object_or_404(Author, pk=pk)
@@ -34,8 +50,11 @@ class author_viewset(viewsets.ViewSet):
 class category_viewset(viewsets.ViewSet):
     def list(self, request):
         queryset = Category.objects.all()
-        serializer = category_serializer(queryset, many=True)
-        return Response(serializer.data)
+        result_page = paginator.paginate_queryset(queryset, request)
+        serializer = self.serializer(result_page, many=True)
+        result = pagination_metadata(paginator, serializer.data)
+        
+        return Response(result)
 
     def retrieve(self, request, pk=None):
         category = get_object_or_404(Category, pk=pk)
