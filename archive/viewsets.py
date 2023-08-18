@@ -1,57 +1,53 @@
 from rest_framework import viewsets
-from .models import Paper, Author, Category
+from rest_framework import filters
+from rest_framework import pagination
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
+from .models import Paper, Author, Category
 from .serializers import paper_serializer, author_serializer, category_serializer
-from .views_utils import list_objects
-from .helpers import (
-    search_paper,
-    search_category,
-    search_author
-)
+from rest_framework.pagination import PageNumberPagination
 
-class paper_viewset(viewsets.ViewSet):
-    model = Paper
-    serializer = paper_serializer
-
-    def list(self, request):
-        return list_objects(request, self.model, self.serializer, search_paper)
+class PaperViewSet(viewsets.ModelViewSet):
+    queryset = Paper.objects.all()
+    serializer_class = paper_serializer
+    pagination_class = PageNumberPagination
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+    search_fields = ['title', 'abstract', 'authors__name', 'categories__name']
+    ordering_fields = ['title', 'abstract', 'authors__name', 'categories__name']
 
     def retrieve(self, request, pk=None):
-        queryset = get_object_or_404(self.model, id=pk)
-        serializer = self.serializer(queryset)
+        paper = get_object_or_404(Paper, id=pk)
+        serializer = self.serializer_class(paper)
         return Response(serializer.data)
 
-class author_viewset(viewsets.ViewSet):
-    model = Author
-    serializer = author_serializer
-    
-    def list(self, request):
-        return list_objects(request, self.model, self.serializer, search_author)
+class AuthorViewSet(viewsets.ModelViewSet):
+    queryset = Author.objects.all()
+    serializer_class = author_serializer
+    pagination_class = PageNumberPagination
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+    search_fields = ['name', 'paper__title', 'paper__abstract', 'paper__categories__name']
+    ordering_fields = ['name']
 
     def retrieve(self, request, pk=None):
         author = get_object_or_404(Author, pk=pk)
-        serializer = author_serializer(author)
+        serializer = self.serializer_class(author)
+        papers = author.paper_set.values("id", "title", "abstract", "publication_date")
         response_data = serializer.data
-
-        papers = Paper.objects.filter(authors=author).values("id", "title", "abstract", "publication_date")
         response_data["papers"] = list(papers)
-
         return Response(response_data)
 
-class category_viewset(viewsets.ViewSet):
-    model = Category
-    serializer = category_serializer
-
-    def list(self, request):
-        return list_objects(request, self.model, self.serializer, search_category)
+class CategoryViewSet(viewsets.ModelViewSet):
+    queryset = Category.objects.all()
+    serializer_class = category_serializer
+    pagination_class = PageNumberPagination
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+    search_fields = ['name', 'paper__title', 'paper__abstract', 'paper__authors__name']
+    ordering_fields = ['name']
 
     def retrieve(self, request, pk=None):
         category = get_object_or_404(Category, pk=pk)
-        serializer = category_serializer(category)
+        serializer = self.serializer_class(category)
+        papers = category.paper_set.values("id", "title", "abstract", "publication_date")
         response_data = serializer.data
-
-        papers = Paper.objects.filter(categories=category).values("id", "title", "abstract", "publication_date")
         response_data["papers"] = list(papers)
-
         return Response(response_data)
