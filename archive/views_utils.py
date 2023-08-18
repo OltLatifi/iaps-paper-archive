@@ -23,7 +23,7 @@ def list_objects(request, model, serializer, search_function):
             order_by = asc_or_desc + order_by
             queryset = queryset.order_by(order_by)
         except FieldDoesNotExist:
-            pass
+            queryset = queryset.order_by("id")
 
     result_page = paginator.paginate_queryset(queryset, request)
     serialized_data = serializer(result_page, many=True).data

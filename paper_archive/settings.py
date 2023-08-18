@@ -31,6 +31,7 @@ USE_SESSION_AUTH = False
 # Application definition
 
 INSTALLED_APPS = [
+    "corsheaders",
     "drf_yasg",
     "archive",
     "rest_framework",
@@ -42,7 +43,10 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
 ]
 
+CORS_ALLOW_ALL_ORIGINS = True
+
 MIDDLEWARE = [
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",

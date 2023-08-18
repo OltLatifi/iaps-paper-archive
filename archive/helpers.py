@@ -51,7 +51,7 @@ def search_category(search: str):
         Q(name__contains=search) |
         Q(paper__title__contains=search) |
         Q(paper__abstract__contains=search) |
-        Q(paper__categories__name__contains=search)
+        Q(paper__authors__name__contains=search)
     )
 
     return categories
@@ -62,6 +62,7 @@ def parse_asc_desc(qp: str) -> str:
     By default orders by descending
     """
     if not qp:
+        
         return "-"
     
     if qp == "asc":
