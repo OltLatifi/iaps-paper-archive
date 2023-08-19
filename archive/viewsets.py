@@ -5,7 +5,7 @@ from rest_framework import viewsets, filters, status
 from .serializers import paper_serializer, author_serializer, category_serializer
 from rest_framework.pagination import PageNumberPagination
 
-class PaperViewSet(viewsets.ModelViewSet):
+class PaperViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Paper.objects.all()
     serializer_class = paper_serializer
     pagination_class = PageNumberPagination
@@ -22,7 +22,7 @@ class PaperViewSet(viewsets.ModelViewSet):
         serializer = self.serializer_class(paper)
         return Response(serializer.data)
 
-class AuthorViewSet(viewsets.ModelViewSet):
+class AuthorViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Author.objects.all()
     serializer_class = author_serializer
     pagination_class = PageNumberPagination
@@ -38,7 +38,7 @@ class AuthorViewSet(viewsets.ModelViewSet):
         response_data["papers"] = list(papers)
         return Response(response_data)
 
-class CategoryViewSet(viewsets.ModelViewSet):
+class CategoryViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Category.objects.all()
     serializer_class = category_serializer
     pagination_class = PageNumberPagination

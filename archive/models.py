@@ -2,9 +2,15 @@ from django.db import models
 
 class Author(models.Model):
     name = models.CharField(max_length=255)
+    
+    class Meta:
+        ordering=["id"]
 
 class Category(models.Model):
     name = models.CharField(max_length=255)
+
+    class Meta:
+        ordering=["id"]
 
 class Paper(models.Model):
     id = models.CharField(primary_key=True, editable=False, max_length=255)
@@ -13,3 +19,6 @@ class Paper(models.Model):
     authors = models.ManyToManyField(Author)
     categories = models.ManyToManyField(Category)
     publication_date = models.DateTimeField()
+
+    class Meta:
+        ordering=["publication_date"]
