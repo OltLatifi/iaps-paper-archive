@@ -1,9 +1,7 @@
-from rest_framework import viewsets
-from rest_framework import filters
-from rest_framework import pagination
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
 from .models import Paper, Author, Category
+from rest_framework import viewsets, filters, status 
 from .serializers import paper_serializer, author_serializer, category_serializer
 from rest_framework.pagination import PageNumberPagination
 
@@ -13,10 +11,14 @@ class PaperViewSet(viewsets.ModelViewSet):
     pagination_class = PageNumberPagination
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
     search_fields = ['title', 'abstract', 'authors__name', 'categories__name']
-    ordering_fields = ['title', 'abstract', 'authors__name', 'categories__name']
+    ordering_fields = ['title', 'abstract', 'authors__name', 'categories__name', 'publication_date']
 
-    def retrieve(self, request, pk=None):
-        paper = get_object_or_404(Paper, id=pk)
+    def retrieve(self, request, id):
+        try:
+            paper = Paper.objects.filter(id=id).first()
+        except Paper.DoesNotExist:
+            return Response({"detail": "Not found"}, status=status.HTTP_404_NOT_FOUND)
+        
         serializer = self.serializer_class(paper)
         return Response(serializer.data)
 
